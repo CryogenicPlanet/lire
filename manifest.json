@@ -10,18 +10,18 @@
     "128": "images/icon-128.png"
   },
   "action": {
-    "default_icon": "icon.png",
+    "default_icon": "images/icon-32.png",
     "default_title": "My Extension",
     "default_popup": "src/pages/popup/index.html"
   },
   "permissions": [],
   "background": {
-    "service_worker": "src/pages/background/index.js"
+    "service_worker": "src/pages/background/index.ts"
   },
   "content_scripts": [
     {
       "matches": ["http://*/*", "https://*/*"],
-      "js": ["src/pages/content/index.ts"]
+      "js": ["src/pages/content-script/index.tsx"]
     }
   ],
   "web_accessible_resources": [

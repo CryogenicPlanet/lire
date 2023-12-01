@@ -1,6 +1,6 @@
 import { createRoot } from "react-dom/client";
 import Content from "./content";
-import "../index.css";
+import "../../index.css";
 
 const root = document.createElement("div");
 root.id = "crx-root";

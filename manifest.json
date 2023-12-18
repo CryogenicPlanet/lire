@@ -14,7 +14,13 @@
     "default_title": "My Extension",
     "default_popup": "src/pages/popup/index.html"
   },
-  "permissions": [],
+  "permissions": [
+    "activeTab",
+    "storage"
+  ],
+  "host_permissions":[
+    "https://api.openai.com/*"
+  ],
   "background": {
     "service_worker": "src/pages/background/index.ts"
   },

@@ -130,7 +130,7 @@ type Schema = CommSchema<{
     startTTS: () => void;
   };
   background: {
-    tts: (textContent: string) => string;
+    tts: (textChunks: string[]) => string[];
   };
 }>;
 

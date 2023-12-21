@@ -22,12 +22,12 @@
     "https://api.openai.com/*"
   ],
   "background": {
-    "service_worker": "src/pages/background/index.ts"
+    "service_worker": "src/pages/background/background.ts"
   },
   "content_scripts": [
     {
       "matches": ["http://*/*", "https://*/*"],
-      "js": ["src/pages/content-script/index.tsx"]
+      "js": ["src/pages/content-script/content.ts"]
     }
   ],
   "web_accessible_resources": [

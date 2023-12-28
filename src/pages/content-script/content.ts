@@ -116,9 +116,11 @@ function highlightCurrentTextChunk(index: number) {
 }
 extComm.onMsg("content", "startTTS", () => {
   // TODO: change to full body content later
-  const content = new Readability(window.document, {
+
+  const documentClone = document.cloneNode(true);
+
+  const content = new Readability(documentClone as Document, {
     keepClasses: true,
-    serializer(node) {},
   }).parse();
 
   const text = content?.textContent;

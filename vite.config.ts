@@ -5,7 +5,7 @@ import { crx } from "@crxjs/vite-plugin";
 import tsconfigPaths from "vite-tsconfig-paths";
 
 import manifest from "./manifest.json";
-// https://vitejs.dev/config/
+
 export default defineConfig({
   plugins: [react({}), crx({ manifest }), tsconfigPaths()],
 });

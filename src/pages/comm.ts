@@ -43,9 +43,13 @@ export const createComm = <S extends SchemaShape>() => {
       msgType: U,
       cb: (msg: Parameters<CommMsg<T>[U]>) => ReturnType<CommMsg<T>[U]>
     ) => {
+      console.log("Registering msg listener", { type, msgType });
       chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+        console.log("Received message", { message, msgType });
         if (message.type === msgType) {
+          console.log("Handling msg", { message, msgType });
           const response = cb(message);
+          console.log("Sending response", { response });
           sendResponse(response);
         }
       });
@@ -62,13 +66,10 @@ export const createComm = <S extends SchemaShape>() => {
       ) => boolean
     ) => {
       chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-        console.log("Handle msg cb", message.type);
-
         const { type, ...msg } = message;
 
+        console.log("Handle msg cb", { message, msgType });
         if (message.type === msgType) {
-          console.log("Handling cb", { cb, message, msg });
-
           const numericKeys = Object.keys(message).filter(
             (key) => !isNaN(Number(key))
           );
@@ -79,7 +80,6 @@ export const createComm = <S extends SchemaShape>() => {
 
           cb(arr, (params) => sendResponse(params));
         }
-        console.log("Called cb");
         return true;
       });
     },
@@ -128,9 +128,12 @@ type Schema = CommSchema<{
   };
   content: {
     startTTS: () => void;
+    voiceChunk: (chunks: { index: number; dataUrl: string }[]) => void;
   };
   background: {
-    tts: (textChunks: string[]) => string[];
+    tts: (textChunks: string[]) => { index: number; dataUrl: string }[];
+    hasOpenAIKey: () => boolean;
+    setOpenAIKey: (key: string) => void;
   };
 }>;
 

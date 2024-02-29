@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
 import { createRoot } from "react-dom/client";
 import { extComm } from "../comm";
+import "../../index.css";
 
 const Popup = () => {
   const playTextAudio = async () => {
@@ -10,8 +10,14 @@ const Popup = () => {
   };
 
   return (
-    <div>
-      <button onClick={playTextAudio}>Play Text Audio</button>
+    <div className='flex flex-col items-center justify-center h-full bg-zinc-800 p-20 w-60 text-gray-200'>
+      <button
+        type='button'
+        onClick={playTextAudio}
+        className='rounded-md bg-indigo-500 px-2.5 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500'
+      >
+        Read out page!
+      </button>
     </div>
   );
 };

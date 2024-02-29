@@ -10,21 +10,27 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build": "vite build",
     "preview": "vite preview"
   },
   "dependencies": {
-    "@emotion/babel-plugin": "^11.11.0",
-    "@emotion/css": "^11.11.2",
-    "@emotion/react": "^11.11.1",
     "@headlessui/react": "^1.7.17",
     "@mozilla/readability": "^0.5.0",
+    "@radix-ui/react-popover": "^1.0.7",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.1.0",
     "ext-comm": "^0.1.0",
+    "lucide-react": "^0.343.0",
     "react": "^18.2.0",
     "react-circular-slider-svg": "^0.3.0",
     "react-dom": "^18.2.0",
     "react-font": "^1.2.1",
-    "react-icons": "^4.12.0"
+    "react-icons": "^4.12.0",
+    "swr": "^2.2.5",
+    "tailwind-merge": "^2.2.1",
+    "tailwindcss-animate": "^1.0.7",
+    "vite-tsconfig-paths": "^4.3.1",
+    "zustand": "^4.5.1"
   },
   "devDependencies": {
     "@crxjs/vite-plugin": "^2.0.0-beta.12",

@@ -1,189 +1,277 @@
-import React, { useEffect, useState } from "react";
-import {
-  IoMdCloseCircle,
-  IoMdRefresh,
-  IoMdBulb,
-  IoMdOptions,
-} from "react-icons/io";
-import CircularSlider from "react-circular-slider-svg";
-import { HoverButton } from "../../components/HoverButton";
-import { css } from "@emotion/react";
-import { ShareButton } from "../../components/ShareButton";
-import Font from "react-font";
-import "../../index.css";
-import "../../toolbox.css";
+import { Readability } from "@mozilla/readability";
 
-const Fonts = [
-  "Ultra",
-  "Roboto",
-  "Caveat",
-  "Lobster",
-  "Dancing Script",
-  "Pacifico",
-  "Montserrat",
-  "Open Sans",
-  "Lato",
-  "Raleway",
-  "Roboto Condensed",
-  "Roboto Slab",
-  "Oswald",
-  "Noto Sans",
-  "Noto Serif",
-  "Noto Sans JP",
-  "Noto Sans KR",
-  "Noto Sans SC",
-  "Noto Sans TC",
-  "Noto Sans Arabic",
-];
+import { extComm } from "../comm";
+import { textToChunks } from "./textUtil";
+import { create } from "zustand";
+import { Controller } from "./controller";
 
-const Toolbar = () => (
-  <div className="bg-gray-100 shadow">
-    <div className="px-4 flex items-center justify-between py-2">
-      <IoMdCloseCircle className="close-icon" size={18} />
-      <div className="title">
-        <span className="text-14">My Boost</span>
-      </div>
-      <IoMdRefresh className="close-icon" size={18} />
-    </div>
-  </div>
-);
+import { subscribeWithSelector } from "zustand/middleware";
+import { createRoot } from "react-dom/client";
+import Modal from "./Modal";
 
-const Controls = () => (
-  <div className="flex mt-2 justify-between">
-    <HoverButton className="px-3 py-2 rounded-md">
-      <IoMdBulb color="#3d3d3e" size={18} />
-    </HoverButton>
-    <HoverButton className="px-3 py-2 rounded-md">
-      <IoMdOptions color="#3d3d3e" size={18} />
-    </HoverButton>
-    <HoverButton className="px-3 py-2 rounded-md">
-      <IoMdRefresh color="#3d3d3e" size={18} />
-    </HoverButton>
-  </div>
-);
+type PlaybackState = "loading tts" | "playing" | "paused" | "done";
 
-const FontSelector = () => (
-  <div className="grid grid-cols-5 gap-2">
-    {Fonts.map((font) => (
-      <div className="font-selector">
-        <Font family={font}>
-          <div className="font-selector-text text-center">Aa</div>
-        </Font>
-      </div>
-    ))}
-  </div>
-);
-
-const ColorPicker = () => {
-  const [value1, setValue1] = useState(20);
-  const [size, setSize] = useState(40);
-  const [isMouseDown, setIsMouseDown] = useState(false);
-  const svgRef = React.useRef(null);
-
-  useEffect(() => {
-    const ref = (svgRef?.current as any).svgRef?.current;
-    ref.style.position = "absolute";
-    ref.style.top = "50%";
-    ref.style.left = "50%";
-    ref.style.transform = "translate(-50%, -50%)";
-  }, []);
-
-  return (
-    <div className="flex justify-center">
-      <div id="grad1">
-        <div
-          className="bg-white w-full h-full relative"
-          onMouseDown={(e) => setIsMouseDown(true)}
-          onMouseUp={(e) => setIsMouseDown(false)}
-          onMouseLeave={(e) => setIsMouseDown(false)}
-          onMouseMove={(e) => {
-            if (!isMouseDown) return;
-            const centerPosGrad1 = document
-              .getElementById("grad1")
-              ?.getBoundingClientRect();
-            // distance of left cornor of grad1 from the center of the circle
-            const distanceFromCenter = Math.sqrt(
-              Math.pow(
-                centerPosGrad1!.width / 2 - (e.clientX - centerPosGrad1!.left),
-                2
-              ) +
-                Math.pow(
-                  centerPosGrad1!.height / 2 -
-                    (e.clientY - centerPosGrad1!.top),
-                  2
-                )
-            );
-            const maxDistance = 200;
-            const size = Math.min(maxDistance, distanceFromCenter * 2);
-            const minSize = 60;
-            setSize(Math.max(minSize, size));
-          }}
-        >
-          <CircularSlider
-            ref={svgRef}
-            size={size}
-            trackWidth={6}
-            minValue={0}
-            maxValue={360}
-            startAngle={0}
-            endAngle={360}
-            handleSize={14}
-            angleType={{
-              direction: "cw",
-              axis: "-y",
-            }}
-            handle1={{
-              value: value1,
-              onChange: (v) => setValue1(v),
-            }}
-            arcColor="transparent"
-            arcBackgroundColor="transparent"
-          />
-        </div>
-      </div>
-    </div>
-  );
+type Config = {
+  highlight: {
+    color?: string;
+    backgroundColor?: string;
+    underlineColor?: string;
+    noUnderline?: boolean;
+    noHighlight: boolean;
+  };
+  scrollToView: boolean;
 };
 
-export default function BoostUI() {
-  return (
-    <div
-      className="fixed right-0 bg-slate-50 z-9999 backdrop-blur-md top-1/2 w-100 rounded-md"
-      style={{
-        background: "#fdfdff",
-        color: "#252526",
-        transform: "translateY(-50%)",
-        boxShadow: "rgba(0, 0, 0, 0.1) 0px 4px 12px",
-        maxWidth: "240px",
-      }}
-    >
-      <Toolbar />
-      <div className="px-4 py-2">
-        <ColorPicker />
-        <div>
-          <Controls />
-          <div
-            className="mt-4 h-30 px-2 py-2"
-            style={{
-              boxShadow: "rgba(0, 0, 0, 0.1) 0px 4px 12px",
-              borderRadius: 4,
-            }}
-          >
-            <FontSelector />
-          </div>
-          <div className="mt-4 flex justify-between">
-            <HoverButton style={{ padding: "6px 24px", borderRadius: 4 }}>
-              Size
-            </HoverButton>
-            <HoverButton style={{ padding: "6px 24px", borderRadius: 4 }}>
-              Case
-            </HoverButton>
-          </div>
-          <div className="mt-8">
-            <ShareButton />
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
+export const usePlaybackStore = create<{
+  currentChunkIndex: number;
+  playbackQueue: { index: number; dataUrl: string }[];
+  isPlaying: boolean;
+  doneTTS: boolean;
+  totalChunkLength: number;
+  textChunks: string[];
+  showController: boolean;
+  state: PlaybackState;
+  config: Config;
+
+  addToPlaybackQueue: (chunks: { index: number; dataUrl: string }[]) => void;
+  togglePlayback: () => void;
+  previousChunk: () => void;
+  nextChunk: () => void;
+}>()(
+  subscribeWithSelector((set, get) => ({
+    currentChunkIndex: 0,
+    totalChunkLength: 0,
+    doneTTS: false,
+    playbackQueue: [],
+    textChunks: [],
+    isPlaying: false,
+    showController: false,
+    state: "loading tts",
+    config: {
+      highlight: {
+        noHighlight: false,
+      },
+      scrollToView: true,
+    },
+    addToPlaybackQueue: (chunks) => {
+      const newChunks = [...get().playbackQueue, ...chunks];
+      const sortedChunks = newChunks.sort((a, b) => a.index - b.index);
+      set({ playbackQueue: sortedChunks });
+    },
+    togglePlayback: () => {
+      set({ isPlaying: !get().isPlaying });
+    },
+    previousChunk: () => {
+      const currentChunkIndex = get().currentChunkIndex;
+      if (currentChunkIndex > 0) {
+        set({ currentChunkIndex: currentChunkIndex - 1 });
+      }
+    },
+    nextChunk: () => {
+      const currentChunkIndex = get().currentChunkIndex;
+      if (currentChunkIndex < get().playbackQueue.length - 1) {
+        set({ currentChunkIndex: currentChunkIndex + 1 });
+      }
+    },
+  }))
+);
+
+const highlightWalker = (textChunks: string[], index: number) => {
+  const body = document.body;
+  const walker = document.createTreeWalker(body, NodeFilter.SHOW_TEXT, null);
+
+  const searchText = textChunks[index];
+
+  const splits = searchText.split("\n").filter((chunk) => chunk.length > 4);
+
+  const elms = document.querySelectorAll(".highlight");
+  elms.forEach((elm) => elm.classList.remove("highlight"));
+
+  let node: Node | null;
+  while ((node = walker.nextNode())) {
+    const nodeText = node.nodeValue;
+    const hasMatch = splits.some(
+      (split) =>
+        nodeText?.toLowerCase().includes(split.toLowerCase()) ||
+        (nodeText && split.toLowerCase().includes(nodeText?.toLowerCase()))
+    );
+
+    if (hasMatch) {
+      const span = document.createElement("span");
+      span.classList.add("highlight");
+      span.textContent = node.nodeValue;
+
+      const parent = node.parentNode;
+      if (parent) {
+        parent.replaceChild(span, node);
+      }
+
+      if (usePlaybackStore.getState().config.scrollToView) {
+        span.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    }
+  }
+};
+
+const setupTextReaderMode = () => {
+  const fontColor = getComputedStyle(document.body).color;
+
+  // Extract RGB values and ignore the alpha channel if it's in rgba format
+  const rgbMatch = fontColor.match(/rgba?\((\d+), (\d+), (\d+)(?:, [\d.]+)?\)/);
+
+  if (!rgbMatch) {
+    console.warn("Could not extract RGB values from font color:", fontColor);
+    return;
+  }
+
+  const r = parseInt(rgbMatch[1]);
+  const g = parseInt(rgbMatch[2]);
+
+  const b = parseInt(rgbMatch[3]);
+
+  document.body.style.color = `rgba(${r}, ${g}, ${b}, ${0.2});`;
+
+  const styleElement = document.createElement("style");
+  styleElement.textContent = `
+    .highlight {
+      color: rgba(${r}, ${g}, ${b},1);
+      font-weight: 500;
+      text-decoration: underline;
+      background-color: rgb(165, 180, 252, 0.4);
+      backdrop-filter: blur(8px);
+      filter: drop-shadow(0 1px 2px rgb(0 0 0 / 0.1)) drop-shadow(0 1px 1px rgb(0 0 0 / 0.06));
+      text-decoration-color: rgba(99, 102, 241, 0.8);
+    }
+  `;
+  document.head.appendChild(styleElement);
+};
+
+const startTTS = async () => {
+  console.log("checking if openAI key exists");
+
+  const hasOpenAIKey = await extComm.sendMsg("background", "hasOpenAIKey", []);
+
+  console.log("hasOpenAIKey", hasOpenAIKey);
+
+  if (!hasOpenAIKey) {
+    const modal = document.createElement("div");
+    modal.id = "crx-modal";
+    document.body.append(modal);
+    createRoot(modal).render(<Modal startTTS={startTTS} />);
+    return;
+  }
+
+  const root = document.createElement("div");
+  root.id = "crx-root";
+  document.body.append(root);
+
+  createRoot(root).render(<Controller />);
+
+  const documentClone = document.cloneNode(true) as Document;
+
+  console.log("cloned document", documentClone);
+
+  usePlaybackStore.setState({ showController: true, state: "loading tts" });
+
+  documentClone.querySelectorAll("br").forEach((br) => {
+    if (br.previousSibling) {
+      const sibling = br.previousSibling;
+      if (sibling.nodeType === Node.TEXT_NODE) {
+        sibling.textContent += "\n";
+      }
+    }
+  });
+
+  const content = new Readability(documentClone as Document, {
+    keepClasses: true,
+  }).parse();
+
+  const text = content?.textContent;
+
+  // console.log("text", text);
+
+  if (!text) throw new Error("no selected text");
+
+  console.log("splitting text into chunks");
+
+  const textChunks = textToChunks(text); // Implement this function
+
+  console.log("textChunks", textChunks);
+
+  extComm.sendMsg("background", "tts", [textChunks]).then((dataUrls) => {
+    // Play audio from URLs and handle the queue
+
+    usePlaybackStore.getState().addToPlaybackQueue(dataUrls);
+
+    usePlaybackStore.setState({
+      isPlaying: true,
+      currentChunkIndex: 0,
+      doneTTS: false,
+      textChunks: textChunks,
+      state: "playing",
+    });
+
+    setupTextReaderMode();
+  });
+
+  extComm.onMsg("content", "voiceChunk", ([chunks]) => {
+    usePlaybackStore.getState().addToPlaybackQueue(chunks);
+  });
+};
+
+extComm.onMsg("content", "startTTS", async () => {
+  // TODO: change to full body content later
+  startTTS();
+  return true;
+});
+
+console.log("content script loaded");
+
+const audioElement = new Audio();
+
+const playNextAudio = () => {
+  console.log("playNextAudio called");
+  const currentChunk = usePlaybackStore.getState().currentChunkIndex;
+  const dataUrl = usePlaybackStore.getState().playbackQueue[currentChunk];
+
+  if (!dataUrl) {
+    console.log("No data URL found for current chunk:", currentChunk);
+    return;
+  }
+
+  console.log("Setting audio source to data URL for chunk:", currentChunk);
+  audioElement.src = dataUrl.dataUrl;
+
+  audioElement.currentTime = 0;
+
+  console.log("Playing audio for chunk:", currentChunk);
+  audioElement.play();
+
+  highlightWalker(usePlaybackStore.getState().textChunks, currentChunk);
+  // highlightCurrentTextChunk(playbackStore.getState().textChunks, currentChunk);
+
+  audioElement.onended = () => {
+    console.log("Audio ended for chunk:", currentChunk);
+    usePlaybackStore.setState({
+      currentChunkIndex: currentChunk + 1,
+    });
+
+    if (usePlaybackStore.getState().isPlaying) {
+      console.log("Continuing playback with next audio chunk");
+      playNextAudio();
+    }
+  };
+};
+
+usePlaybackStore.subscribe(
+  (state) => state.isPlaying,
+  (isPlaying) => {
+    console.log("Playback state changed. Is playing:", isPlaying);
+    if (isPlaying) {
+      playNextAudio();
+    } else {
+      console.log("Pausing audio playback");
+      audioElement.pause();
+    }
+  }
+);

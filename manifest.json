@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "My Extension",
+  "name": "lire",
   "version": "1.0",
-  "description": "My Extension",
+  "description": "A free open-source TTS reader using OpenAI, will read out a page and highlight the text it is reading",
   "icons": {
     "16": "images/icon-16.png",
     "32": "images/icon-32.png",
@@ -11,14 +11,14 @@
   },
   "action": {
     "default_icon": "images/icon-32.png",
-    "default_title": "My Extension",
+    "default_title": "Read ext",
     "default_popup": "src/pages/popup/index.html"
   },
   "permissions": [
     "activeTab",
     "storage"
   ],
-  "host_permissions":[
+  "host_permissions": [
     "https://api.openai.com/*"
   ],
   "background": {
@@ -26,8 +26,13 @@
   },
   "content_scripts": [
     {
-      "matches": ["http://*/*", "https://*/*"],
-      "js": ["src/pages/content-script/content.ts"]
+      "matches": [
+        "http://*/*",
+        "https://*/*"
+      ],
+      "js": [
+        "src/pages/content-script/content.tsx"
+      ]
     }
   ],
   "web_accessible_resources": [
@@ -35,6 +40,5 @@
       "resources": [],
       "matches": []
     }
-  ],
-  "options_page": "src/pages/options/index.html"
+  ]
 }

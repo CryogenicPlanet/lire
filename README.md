@@ -1,6 +1,6 @@
 # Lire
 
-![](/images/logo.png)
+<img src="/images/logo.png" width=500 />
 
 A free open-source TTS reader using OpenAI, will read out a page and highlight the text it is reading.
 

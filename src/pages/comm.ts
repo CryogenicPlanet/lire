@@ -129,6 +129,7 @@ type Schema = CommSchema<{
   content: {
     startTTS: () => void;
     voiceChunk: (chunks: { index: number; dataUrl: string }[]) => void;
+    doneTTS: () => void;
   };
   background: {
     tts: (textChunks: string[]) => { index: number; dataUrl: string }[];

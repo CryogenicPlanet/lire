@@ -8,6 +8,8 @@ Bring your own OPENAI key to use this extension.
 
 ## TODOs
 
+- [ ] Regen from a certain point
+- [ ] Better chunking and highlighting
 - [ ] PDF support
 - [ ] fine grained duration controls
 - [ ] better highlighting

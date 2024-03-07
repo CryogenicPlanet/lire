@@ -30,7 +30,6 @@ async function fetchTTS(
     throw new Error("No OpenAI key found");
   }
 
-  console.log("fetchTTS function reached");
   return fetch("https://api.openai.com/v1/audio/speech", {
     method: "POST",
     headers: {
@@ -44,18 +43,15 @@ async function fetchTTS(
     }),
   })
     .then((response) => {
-      console.log("TTS fetch response received");
       return response.blob();
     })
     .then((blob) => {
-      console.log("Converting blob to data URL");
       return new Promise<{
         index: number;
         dataUrl: string;
       }>((resolve) => {
         const reader = new FileReader();
         reader.onloadend = () => {
-          console.log("Blob conversion to data URL completed");
           resolve({
             index: idx,
             dataUrl: reader.result as string,
@@ -66,30 +62,45 @@ async function fetchTTS(
     });
 }
 
-const queueRestChunks = async (texts: string[]) => {
-  const delay = (ms: number) =>
-    new Promise((resolve) => setTimeout(resolve, ms));
+const queueRestChunks = async (texts: string[], startIdx: number) => {
   const maxFetchesPerMinute = 30;
   const interval = 60000 / maxFetchesPerMinute; // Interval in milliseconds
 
+  const promises = [];
   for (const [index, text] of texts.entries()) {
-    setTimeout(
-      () =>
-        fetchTTS(text, index).then((url) => {
-          extComm.sendMsg("content", "voiceChunk", [[url]]);
-        }),
-      index * interval
-    );
-    await delay(interval); // Ensure we don't exceed the rate limit
+    const promise = new Promise((resolve) => {
+      setTimeout(
+        () =>
+          fetchTTS(text, startIdx + index)
+            .then((url) =>
+              extComm
+                .sendMsgToActiveTab("voiceChunk", [[url]])
+                .then(() => console.log(`voiceChunk ${url.index} sent`))
+            )
+            .then(resolve),
+        index * interval
+      );
+    });
+    promises.push(promise);
   }
+
+  console.log("Scheduled voiceChunks", texts.length);
+
+  await Promise.all(promises);
+
+  console.log("All voiceChunks done");
+
+  await extComm.sendMsgToActiveTab("doneTTS", []);
 };
 
 extComm.onMsgCallback("background", "tts", ([text], callback) => {
   console.log("Received TTS message with text:", text);
 
-  const firstThirtyChunks = text.slice(0, 30);
+  const split = 30;
 
-  const rest = text.slice(30);
+  const firstThirtyChunks = text.slice(0, split);
+
+  const rest = text.slice(split);
 
   const ttsPromises = firstThirtyChunks.map((chunk, idx) =>
     fetchTTS(chunk, idx)
@@ -105,7 +116,7 @@ extComm.onMsgCallback("background", "tts", ([text], callback) => {
       callback([]);
     });
 
-  queueRestChunks(rest);
+  queueRestChunks(rest, split);
 
   return true; // Indicates an asynchronous response
 });

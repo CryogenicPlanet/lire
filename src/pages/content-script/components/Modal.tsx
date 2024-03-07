@@ -1,6 +1,6 @@
 import { Fragment, useState } from "react";
 import { Dialog, Transition } from "@headlessui/react";
-import { extComm } from "../comm";
+import { extComm } from "../../comm";
 
 export default function Modal(
   props: React.PropsWithChildren<{

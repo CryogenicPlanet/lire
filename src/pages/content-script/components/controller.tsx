@@ -3,20 +3,29 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import "../../index.css";
-import { usePlaybackStore } from "./content";
+import "@/index.css";
 import { LoadingIcon } from "@/components/loading";
+import { usePlaybackStore } from "../lib/store";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 export const Controller = () => {
   const {
     showController,
-    state,
+    playbackState: state,
     togglePlayback,
     previousChunk,
     nextChunk,
     isPlaying,
     config,
+    ttsState,
   } = usePlaybackStore();
+
+  console.log({ showController });
 
   if (!showController) return null;
 
@@ -55,7 +64,7 @@ export const Controller = () => {
                 <LoadingIcon className='w-6 h-6 animate-spin' />
               </div>
             ) : (
-              <>
+              <div className='flex flex-col space-y-2 items-center'>
                 <div className='flex items-center space-x-4'>
                   <button
                     type='button'
@@ -135,27 +144,7 @@ export const Controller = () => {
                     </svg>
                   </button>
                 </div>
-                {/* <div className='flex items-center'>
-                  <input
-                    type='checkbox'
-                    id='highlight'
-                    name='highlight'
-                    checked={!config.highlight.noHighlight}
-                    onChange={(e) => {
-                      const newHighlightConfig = {
-                        ...config.highlight,
-                        noHighlight: !e.target.checked,
-                      };
-                      usePlaybackStore.setState((state) => ({
-                        ...state,
-                        highlight: newHighlightConfig,
-                      }));
-                    }}
-                  />
-                  <label htmlFor='highlight' className='ml-2 text-sm'>
-                    Should highlight
-                  </label>
-                </div> */}
+
                 <div className='flex items-center'>
                   <input
                     type='checkbox'
@@ -174,7 +163,18 @@ export const Controller = () => {
                     Should scroll into view
                   </label>
                 </div>
-              </>
+
+                <Accordion type='single' collapsible>
+                  <AccordionItem value='item-1'>
+                    <AccordionTrigger>Debug</AccordionTrigger>
+                    <AccordionContent>
+                      <div className='flex items-center whitespace-break-spaces'>
+                        <p>{JSON.stringify(ttsState)}</p>
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
+              </div>
             )}
           </div>
         </PopoverContent>
